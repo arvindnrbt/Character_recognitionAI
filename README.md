@@ -3,12 +3,16 @@ Character recognition using Convolutional Neural Networtk
 
 # Setting up
 -> virtualenv -p python3 envcharrec
+
 -> Activate virtualenv
+
 -> pip3 install -r requirements.txt
 
 # Train and Predict
 -> python3 gendata.py
+
 -> python3 train.py
+
 -> python3 check_model.py
 
 # Additional info
