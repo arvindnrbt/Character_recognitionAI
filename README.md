@@ -18,7 +18,9 @@ Character recognition using Convolutional Neural Networtk
 # Additional info
 The trained model is always overwritten to best_weights.hdf5, for every tuning of the model any improvements to accuracy and loss will be saved in a seperate folder in the root directory
 
-Eg: 65per - 65% accurate weights
+Example: 
+    
+    65per - 65% accurate weights
 
     75per - 75% accurate weights
 
