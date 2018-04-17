@@ -65,22 +65,22 @@ modelCheckpoint = keras.callbacks.ModelCheckpoint(model_save_path, monitor='val_
 
 character_model = Sequential()
 character_model.add(Conv2D(
-    20, kernel_size=(4,4), activation='relu',
+    30, kernel_size=(3,3), activation='relu',
     input_shape=(img_rows, img_cols, 3)
 ))
 character_model.add(Conv2D(
-    20, kernel_size=(4,4), activation='relu'))
+    30, kernel_size=(3,3), activation='relu'))
 
 character_model.add(Conv2D(
-    20, kernel_size=(4,4),activation='relu'))
+    30, kernel_size=(3,3),activation='relu'))
 # character_model.add(Dropout(0.4))
 character_model.add(Conv2D(
-    20, kernel_size=(4,4),activation='relu'))
-character_model.add(Dropout(0.5))
+    30, kernel_size=(3,3),activation='relu'))
+character_model.add(Dropout(0.4))
 
 character_model.add(Conv2D(
-    20, kernel_size=(4,4), activation='relu'))
-character_model.add(Dropout(0.5))
+    30, kernel_size=(3,3), activation='relu'))
+character_model.add(Dropout(0.4))
 
 
 character_model.add(Flatten())
