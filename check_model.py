@@ -8,11 +8,13 @@ from keras.utils import *
 from keras.layers import Dense, Conv2D, Flatten, Dropout
 import os
 
+IMG_PATH = './Images2/'
 weight_path = './best_weights.hdf5'
+FONT_PATH = './Font Pack/'
 num_classes = 26
 img_rows=28
 img_cols=28
-num_fonts = 332
+num_fonts = 197
 
 # image_files = [
 #     './Images/a0.png',
@@ -119,18 +121,25 @@ character_model.load_weights(weight_path)
 
 x = 1
 while (x is not '0'):
-    try:
-        char = str(input('Enter the character to find results: '))
-    except ValueError:
-        continue
-    index = label_vals.index(char)
+    # try:
+    #     char = str(input('Enter the character to find results: '))
+    #     index = label_vals.index(char)
+    # except ValueError:
+    #     continue
+    # st = num_fonts*index
+    # ed = st+num_fonts
 
-    st = num_fonts*index
-    ed = st+num_fonts
-
+    # image_files = []
+    # for i in range(st,ed):
+    #     image_files.append(IMG_PATH+char+str(i)+'.png')
     image_files = []
-    for i in range(st,ed):
-        image_files.append('./Images/'+char+str(i)+'.png')
+    path_input = input('Enter the absolute path of your imaage: ')
+
+    if os.path.isfile(path_input) == False or path_input.split('.')[1] != '.png':
+        print ("Please enter the full path of a valid png file")
+        continue
+
+    image_files.append(path_input)
 
     x,y = pre_process_image_input(image_files)
 

@@ -16,8 +16,6 @@ model_save_path = './best_weights.hdf5'
 img_rows = 28
 img_cols = 28
 
-num_train_set = 0
-
 num_classes = 26
 FP = os.getcwd()
 
@@ -28,7 +26,6 @@ data_file = pd.read_csv('Train.csv')
 def pre_process_image_input(data):
     labels = data['label'].tolist()
     onehot_y = to_categorical(labels, num_classes)
-    num_train_set = len(data)
 
     image_files = [os.path.join(image_dir, img) for img in data['image'].tolist()]
     imgs = [imread(img_path) for img_path in image_files]
@@ -76,11 +73,11 @@ character_model.add(Conv2D(
 # character_model.add(Dropout(0.4))
 character_model.add(Conv2D(
     30, kernel_size=(3,3),activation='relu'))
-character_model.add(Dropout(0.4))
+character_model.add(Dropout(0.3))
 
 character_model.add(Conv2D(
     30, kernel_size=(3,3), activation='relu'))
-character_model.add(Dropout(0.4))
+character_model.add(Dropout(0.3))
 
 
 character_model.add(Flatten())
@@ -94,7 +91,7 @@ character_model.compile(loss=keras.losses.categorical_crossentropy,
 character_model.summary()
 
 character_model.fit_generator(train_generator,
-          epochs=20,
+          epochs=5,
         #   steps_per_epoch = 20,
           validation_data = test_generator,
           callbacks=[earlyStopping, modelCheckpoint])
