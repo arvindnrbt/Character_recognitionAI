@@ -1,14 +1,14 @@
-import keras
 import tensorflow as tf
-from keras.preprocessing.image import ImageDataGenerator, img_to_array
 from skimage.io import imread
 import pandas as pd
-
-from sklearn.metrics import confusion_matrix
 import numpy as np
+
+import keras
 from keras.models import Sequential
 from keras.utils import *
 from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.preprocessing.image import ImageDataGenerator, img_to_array
+
 import os
 
 IMG_PATH = './Images/'
@@ -104,10 +104,39 @@ predictions = character_model.predict_classes(x)
 
 df['prediction']=[label_dict[pred] for pred in predictions]
 
-print (pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True))
-# print (confusion_matrix(df['character'],df['prediction']))
+confusionMatrix = pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True)
 
-# print ('True Positive')
-# print ('True Negative')
-# print ('False Positive')
-# print ('False Negative')
+confusionMatrix = confusionMatrix.drop(labels='All', axis=1)
+confusionMatrix = confusionMatrix.drop(labels='All', axis=0)
+
+confusionMatrix.to_csv('current_model_result.csv')
+
+FP = confusionMatrix.sum(axis=0) - np.diag(confusionMatrix)  
+FN = confusionMatrix.sum(axis=1) - np.diag(confusionMatrix)
+TP = np.diag(confusionMatrix)
+TN = confusionMatrix.values.sum() - (FP + FN + TP)
+
+# Sensitivity, hit rate, recall, or true positive rate
+TPR = TP/(TP+FN)
+# Specificity or true negative rate
+TNR = TN/(TN+FP) 
+# Precision or positive predictive value
+PPV = TP/(TP+FP)
+# Negative predictive value
+NPV = TN/(TN+FN)
+# Fall out or false positive rate
+FPR = FP/(FP+TN)
+# False negative rate
+FNR = FN/(TP+FN)
+# False discovery rate
+FDR = FP/(TP+FP)
+
+# Overall accuracy
+ACC = (TP+TN)/(TP+FP+FN+TN)
+
+print ('True Positive',TPR)
+print ('False Negative',FNR)
+print ('False Positive',FPR)
+print ('True Negative',TNR)
+
+print ('Accuracy', ACC)
