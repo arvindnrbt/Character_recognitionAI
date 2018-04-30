@@ -19,15 +19,15 @@ img_cols = 28
 num_classes = 26
 FP = os.getcwd()
 
-image_dir = 'Images'
-input_path = os.path.join(FP,image_dir)
+# image_dir = 'Images'
+input_path = FP #os.path.join(FP,image_dir)
 data_file = pd.read_csv('Train.csv')
 
 def pre_process_image_input(data):
     labels = data['label'].tolist()
     onehot_y = to_categorical(labels, num_classes)
 
-    image_files = [os.path.join(image_dir, img) for img in data['image'].tolist()]
+    image_files = data['image'].tolist()
     imgs = [imread(img_path) for img_path in image_files]
     img_array = np.array([(img_to_array(img)) for img in imgs])
     # x = preprocess_input(img_array)
@@ -91,7 +91,7 @@ character_model.compile(loss=keras.losses.categorical_crossentropy,
 character_model.summary()
 
 character_model.fit_generator(train_generator,
-          epochs=5,
+          epochs=10,
         #   steps_per_epoch = 20,
           validation_data = test_generator,
           callbacks=[earlyStopping, modelCheckpoint])

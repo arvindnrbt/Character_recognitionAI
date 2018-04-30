@@ -2,48 +2,23 @@ import keras
 import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
 from skimage.io import imread
+import pandas as pd
 import numpy as np
 from keras.models import Sequential
 from keras.utils import *
 from keras.layers import Dense, Conv2D, Flatten, Dropout
 import os
 
-IMG_PATH = './Images2/'
+IMG_PATH = './Images/'
 weight_path = './best_weights.hdf5'
 FONT_PATH = './Font Pack/'
+train_csv = 'Train.csv'
 num_classes = 26
 img_rows=28
 img_cols=28
-num_fonts = 197
-
-# image_files = [
-#     './Images/a0.png',
-#     './Images/b313.png',
-#     './Images/c646.png',
-#     './Images/d939.png',
-#     './Images/e1252.png',
-#     './Images/f1565.png',
-#     './Images/g1878.png',
-#     './Images/h2191.png',
-#     './Images/i2514.png',
-#     './Images/j2817.png',
-#     './Images/k3130.png',
-#     './Images/l3443.png',
-#     './Images/m3756.png',
-#     './Images/n4069.png',
-#     './Images/o4382.png',
-#     './Images/p4695.png',
-#     './Images/q5008.png',
-#     './Images/r5321.png',
-#     './Images/s5634.png',
-#     './Images/t5947.png',
-#     './Images/u6260.png',
-#     './Images/v6573.png',
-#     './Images/w6886.png',
-#     './Images/x7199.png',
-#     './Images/y7512.png',
-#     './Images/z7825.png',    
-# ]
+num_fonts = 196
+offsets = 6
+num_set = num_fonts * offsets
 
 label_dict = {
     0:'a',
@@ -76,12 +51,10 @@ label_dict = {
 st = 0
 label_vals = list(label_dict.values())
 
-def pre_process_image_input(image_files):
-    labels = list(label_dict.keys()) #[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+def pre_process_image_input(image_files, labels):
     onehot_y = to_categorical(labels, num_classes)
     imgs = [imread(img_path) for img_path in image_files]
     img_array = np.array([(img_to_array(img)) for img in imgs])
-    # x = preprocess_input(img_array)
     x = img_array /255
     return x, onehot_y
 
@@ -118,38 +91,18 @@ character_model.compile(loss=keras.losses.categorical_crossentropy,
 character_model.load_weights(weight_path)
 
 # Prediction
+df = pd.read_csv(train_csv)
 
-x = 1
-while (x is not '0'):
-    # try:
-    #     char = str(input('Enter the character to find results: '))
-    #     index = label_vals.index(char)
-    # except ValueError:
-    #     continue
-    # st = num_fonts*index
-    # ed = st+num_fonts
+labels = df['label'].tolist()
+image_files = df['image'].tolist()
 
-    # image_files = []
-    # for i in range(st,ed):
-    #     image_files.append(IMG_PATH+char+str(i)+'.png')
-    image_files = []
-    path_input = input('Enter the absolute path of your imaage: ')
+x,y = pre_process_image_input(image_files,labels)
 
-    if os.path.isfile(path_input) == False or path_input.split('.')[1] != '.png':
-        print ("Please enter the full path of a valid png file")
-        continue
+predictions = character_model.predict_classes(x)
 
-    image_files.append(path_input)
-
-    x,y = pre_process_image_input(image_files)
-
-    predictions = character_model.predict_classes(x)
-
-    count =0
-    for ind,pred in enumerate(predictions):
-        # print(label_dict[pred])
-        if label_dict[pred] == char:
-            count = count+1
-
-    print (str(count)+' / '+str(num_fonts))
-    x = input("\n\tEnter 0 to quit..")
+df.assign(prediction=predictions)
+   
+print ('True Positive')
+print ('True Negative')
+print ('False Positive')
+print ('False Negative')

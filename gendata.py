@@ -13,17 +13,19 @@ print ('Number of fonts used: ',len(fonts)-3)
 Y = []
 count = 0
 
-def MakeImg(text, font, name, max_size, offset):
-    img = Image.new('RGB', max_size, "white")
+def MakeImg(text, font, name, size, offset):
+    img = Image.new('RGB', (size[0]-2,size[1]-2), "white")
     draw = ImageDraw.Draw(img)
-    draw.text(offset, text, (0, 0, 0), font = font)
+    color = (0,0,0)
+    draw.text(offset, text, color, font = font)
     directory = os.getcwd() + IMAGE_FOLDER
     if not os.path.exists(directory):
         os.makedirs(directory)
+    img = img.resize((28,28))
     img.save(directory+name)
 
-xoff = (0,18)
-yoff = (-5,6)
+xoff = (0,6)
+yoff = (-5,4)
 step = 3
 
 for i,text in enumerate(characters):
@@ -33,14 +35,14 @@ for i,text in enumerate(characters):
             continue      
         if not os.path.isfile(font_loc) or font_name.split('.')[1] != 'ttf':
             continue
-        font = ImageFont.truetype(font_loc, 18)
+        font = ImageFont.truetype(font_loc, 53)
         # offset = (7,5)
-        max_size = (28,28)
+        size = font.getsize(text)
         font_name = font_loc.split('.')[0].split('/')[-1]
         for offset_i in range(xoff[0],xoff[1],step):
             for offset_j in range(yoff[0],yoff[1],step):
-                name = str(text)+str(count)+'.png'                    
-                MakeImg(text, font, name, max_size, (offset_i,offset_j))
+                name = IMAGE_FOLDER+str(text)+str(count)+'.png'                    
+                MakeImg(text, font, name, size, (offset_i,offset_j))
                 count = count+1                
                 Y.append(name +','+str(i)+','+text+',('+str(offset_i)+' '+str(offset_j)+'),'+font_name)
 
