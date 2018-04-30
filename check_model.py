@@ -3,6 +3,8 @@ import tensorflow as tf
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
 from skimage.io import imread
 import pandas as pd
+
+from sklearn.metrics import confusion_matrix
 import numpy as np
 from keras.models import Sequential
 from keras.utils import *
@@ -100,9 +102,12 @@ x,y = pre_process_image_input(image_files,labels)
 
 predictions = character_model.predict_classes(x)
 
-df.assign(prediction=predictions)
-   
-print ('True Positive')
-print ('True Negative')
-print ('False Positive')
-print ('False Negative')
+df['prediction']=[label_dict[pred] for pred in predictions]
+
+print (pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True))
+# print (confusion_matrix(df['character'],df['prediction']))
+
+# print ('True Positive')
+# print ('True Negative')
+# print ('False Positive')
+# print ('False Negative')
