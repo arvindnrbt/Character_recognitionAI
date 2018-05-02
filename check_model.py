@@ -106,10 +106,10 @@ df['prediction']=[label_dict[pred] for pred in predictions]
 
 confusionMatrix = pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True)
 
+confusionMatrix.to_csv('current_model_result.csv')
+
 confusionMatrix = confusionMatrix.drop(labels='All', axis=1)
 confusionMatrix = confusionMatrix.drop(labels='All', axis=0)
-
-confusionMatrix.to_csv('current_model_result.csv')
 
 FP = confusionMatrix.sum(axis=0) - np.diag(confusionMatrix)  
 FN = confusionMatrix.sum(axis=1) - np.diag(confusionMatrix)
