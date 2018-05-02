@@ -16,8 +16,8 @@ weight_path = './best_weights.hdf5'
 FONT_PATH = './Font Pack/'
 train_csv = 'Train.csv'
 num_classes = 26
-img_rows=28
-img_cols=28
+img_rows=50
+img_cols=50
 num_fonts = 196
 offsets = 6
 num_set = num_fonts * offsets
@@ -95,6 +95,12 @@ character_model.load_weights(weight_path)
 # Prediction
 df = pd.read_csv(train_csv)
 
+for index, img in enumerate(df['image'].tolist()):
+    if not os.path.exists(img):
+        df.drop(index,inplace=True)
+
+df = df.sample(frac=1).reset_index(drop=True)
+
 labels = df['label'].tolist()
 image_files = df['image'].tolist()
 
@@ -103,6 +109,8 @@ x,y = pre_process_image_input(image_files,labels)
 predictions = character_model.predict_classes(x)
 
 df['prediction']=[label_dict[pred] for pred in predictions]
+
+df.to_csv('Result.csv')
 
 confusionMatrix = pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True)
 

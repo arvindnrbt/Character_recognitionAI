@@ -1,6 +1,6 @@
 import numpy as np
 import tensorflow as tf
-from skimage.io import imread
+from skimage.io import imread, imshow
 import os
 import keras
 from keras.models import Sequential
@@ -11,8 +11,8 @@ from keras.preprocessing.image import img_to_array
 import argparse
 
 weight_path = './best_weights.hdf5'
-img_rows=28
-img_cols=28
+img_rows=50
+img_cols=50
 num_classes = 26
 
 label_dict = {
@@ -51,7 +51,7 @@ image_file = args.image
 
 def pre_process_image_input(image_file):
     img = imread(image_file)
-    img = resize(img, (img_rows,img_cols))
+    # img = img
     img_array = np.array([img_to_array(img)])
     x = img_array /255
     return x
@@ -71,12 +71,11 @@ character_model.add(Conv2D(
 # character_model.add(Dropout(0.4))
 character_model.add(Conv2D(
     30, kernel_size=(3,3),activation='relu'))
-character_model.add(Dropout(0.3))
+character_model.add(Dropout(0.4))
 
 character_model.add(Conv2D(
     30, kernel_size=(3,3), activation='relu'))
-character_model.add(Dropout(0.3))
-
+character_model.add(Dropout(0.4))
 
 character_model.add(Flatten())
 
@@ -84,12 +83,12 @@ character_model.add(Dense(512, activation='relu'))
 character_model.add(Dense(num_classes, activation='softmax'))
 
 character_model.compile(loss=keras.losses.categorical_crossentropy,
-              optimizer='adam',
-              metrics=['accuracy'])
+            optimizer='adam',
+            metrics=['accuracy'])
 
 character_model.load_weights(weight_path)
 
 x = pre_process_image_input(image_file)
 predictions = character_model.predict_classes(x)
-
+imshow(x)
 print (label_dict[predictions[0]])

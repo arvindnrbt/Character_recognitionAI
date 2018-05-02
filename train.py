@@ -13,8 +13,8 @@ import os
 # np.set_printoptions(threshold=np.nan)
 
 model_save_path = './best_weights.hdf5'
-img_rows = 28
-img_cols = 28
+img_rows = 50
+img_cols = 50
 
 num_classes = 26
 FP = os.getcwd()
@@ -42,6 +42,10 @@ width_shift_range = 0.2,
 height_shift_range = 0.2,
 rescale=2
 )
+
+for index, img in enumerate(data_file['image'].tolist()):
+    if not os.path.exists(img):
+        data_file.drop(index,inplace=True)
 
 train_input, test_input, train_label, test_label = pre_process_image_input(data_file)
 
@@ -91,7 +95,7 @@ character_model.compile(loss=keras.losses.categorical_crossentropy,
 character_model.summary()
 
 character_model.fit_generator(train_generator,
-          epochs=10,
+          epochs=8,
         #   steps_per_epoch = 20,
           validation_data = test_generator,
           callbacks=[earlyStopping, modelCheckpoint])

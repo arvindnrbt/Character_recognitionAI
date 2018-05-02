@@ -1,0 +1,2 @@
+best_weights.hdf5 filter=lfs diff=lfs merge=lfs -text
+84per50x50/best_weights.hdf5 filter=lfs diff=lfs merge=lfs -text
