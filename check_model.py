@@ -50,7 +50,7 @@ label_dict = {
     24:'y',
     25:'z'
 }
-st = 0
+
 label_vals = list(label_dict.values())
 
 def pre_process_image_input(image_files, labels):
