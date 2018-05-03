@@ -2,7 +2,7 @@ import tensorflow as tf
 from skimage.io import imread
 import pandas as pd
 import numpy as np
-
+import string
 import keras
 from keras.models import Sequential
 from keras.utils import *
@@ -15,43 +15,11 @@ IMG_PATH = './Images/'
 weight_path = './best_weights.hdf5'
 FONT_PATH = './Font Pack/'
 train_csv = 'Train.csv'
-num_classes = 26
+num_classes = 52
 img_rows=50
 img_cols=50
-num_fonts = 196
-offsets = 6
-num_set = num_fonts * offsets
 
-label_dict = {
-    0:'a',
-    1:'b',
-    2:'c',
-    3:'d',
-    4:'e',
-    5:'f',
-    6:'g',
-    7:'h',
-    8:'i',
-    9:'j',
-    10:'k',
-    11:'l',
-    12:'m',
-    13:'n',
-    14:'o',
-    15:'p',
-    16:'q',
-    17:'r',
-    18:'s',
-    19:'t',
-    20:'u',
-    21:'v',
-    22:'w',
-    23:'x',
-    24:'y',
-    25:'z'
-}
-
-label_vals = list(label_dict.values())
+label_vals = list(string.ascii_letters)
 
 def pre_process_image_input(image_files, labels):
     onehot_y = to_categorical(labels, num_classes)
@@ -99,7 +67,6 @@ for index, img in enumerate(df['image'].tolist()):
     if not os.path.exists(img):
         df.drop(index,inplace=True)
 
-df = df.sample(frac=1).reset_index(drop=True)
 
 labels = df['label'].tolist()
 image_files = df['image'].tolist()
@@ -108,7 +75,7 @@ x,y = pre_process_image_input(image_files,labels)
 
 predictions = character_model.predict_classes(x)
 
-df['prediction']=[label_dict[pred] for pred in predictions]
+df['prediction']=[label_vals[pred] for pred in predictions]
 
 df.to_csv('Result.csv')
 

@@ -9,7 +9,7 @@ fonts = os.listdir(FONT_FOLDER)
 img_row = 50
 img_col = 50
 
-characters = list(string.ascii_letters[0:26]) #+list(string.digits)
+characters = list(string.ascii_letters) #+list(string.digits)
 print ('Characters: ',characters)
 print ('Number of fonts used: ',len(fonts)-3)
 

@@ -16,12 +16,13 @@ model_save_path = './best_weights.hdf5'
 img_rows = 50
 img_cols = 50
 
-num_classes = 26
-FP = os.getcwd()
+num_classes = 52
 
-# image_dir = 'Images'
-input_path = FP #os.path.join(FP,image_dir)
 data_file = pd.read_csv('Train.csv')
+
+def split_train_data(x):
+    train, val, test = np.split(x, [int(.6*len(x)), int(.8*len(x))])
+    return train, val, test
 
 def pre_process_image_input(data):
     labels = data['label'].tolist()
@@ -30,10 +31,12 @@ def pre_process_image_input(data):
     image_files = data['image'].tolist()
     imgs = [imread(img_path) for img_path in image_files]
     img_array = np.array([(img_to_array(img)) for img in imgs])
-    # x = preprocess_input(img_array)
+    
     x = img_array /255
-    x_train, x_test, y_train, y_test = train_test_split(x,onehot_y)
-    return x_train, x_test, y_train, y_test
+    x_train, x_val, x_test = split_train_data(x)
+    y_train, y_val, y_test = split_train_data(onehot_y)
+
+    return x_train, x_val, x_test, y_train, y_val, y_test
 
 data_gen = ImageDataGenerator(
 # featurewise_center=True, #
@@ -47,7 +50,10 @@ for index, img in enumerate(data_file['image'].tolist()):
     if not os.path.exists(img):
         data_file.drop(index,inplace=True)
 
-train_input, test_input, train_label, test_label = pre_process_image_input(data_file)
+# Shuffling
+data_file = data_file.sample(frac=1).reset_index(drop=True)
+
+train_input, val_input, test_input, train_label, val_label, test_label = pre_process_image_input(data_file)
 
 train_generator = data_gen.flow(
     x=train_input,
@@ -55,9 +61,9 @@ train_generator = data_gen.flow(
     seed=4
 )
 
-test_generator = data_gen.flow(
-    x=test_input,
-    y=test_label,
+val_generator = data_gen.flow(
+    x=val_input,
+    y=val_label,
     seed=4
 )
 
@@ -95,9 +101,9 @@ character_model.compile(loss=keras.losses.categorical_crossentropy,
 character_model.summary()
 
 character_model.fit_generator(train_generator,
-          epochs=8,
+          epochs=12,
         #   steps_per_epoch = 20,
-          validation_data = test_generator,
+          validation_data = val_generator,
           callbacks=[earlyStopping, modelCheckpoint])
 
 score = character_model.evaluate(test_input, test_label, batch_size=128)

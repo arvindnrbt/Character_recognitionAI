@@ -1,6 +1,7 @@
 import numpy as np
 import tensorflow as tf
-from skimage.io import imread, imshow
+from skimage.io import imread
+from PIL import Image
 import os
 import keras
 from keras.models import Sequential
@@ -13,7 +14,7 @@ import argparse
 weight_path = './best_weights.hdf5'
 img_rows=50
 img_cols=50
-num_classes = 26
+num_classes = 52
 
 label_dict = {
     0:'a',
@@ -90,5 +91,5 @@ character_model.load_weights(weight_path)
 
 x = pre_process_image_input(image_file)
 predictions = character_model.predict_classes(x)
-imshow(x)
+Image.fromarray(x).show()
 print (label_dict[predictions[0]])
