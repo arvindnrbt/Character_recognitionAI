@@ -1,13 +1,16 @@
 import numpy as np
 import string, os
 from PIL import Image, ImageDraw, ImageFont
+from configuration import config
 
-IMAGE_FOLDER = '/Images/'
-FONT_FOLDER = os.getcwd()+'/Font Pack/'
+IMAGE_FOLDER = '/'+config['IMAGE_PATH']+'/'
+FONT_FOLDER = os.getcwd()+'/'+config['FONT_PATH']+'/'
 fonts = os.listdir(FONT_FOLDER)
 
-img_row = 50
-img_col = 50
+num_classes=config['NUM_CLASSES']
+img_row = config['IMAGE_ROWS']
+img_col = config['IMAGE_COLUMNS']
+Train_file = config['TRAIN_CSV']
 
 characters = list(string.ascii_letters) #+list(string.digits)
 print ('Characters: ',characters)
@@ -46,10 +49,11 @@ for i,text in enumerate(characters):
             for offset_j in range(yoff[0],yoff[1],step):
                 name = IMAGE_FOLDER+str(text)+str(count)+'.png'                    
                 MakeImg(text, font, name, size, (offset_i,offset_j))
-                count = count+1                
-                Y.append('.'+name +','+str(i)+','+text+',('+str(offset_i)+' '+str(offset_j)+'),'+font_name)
+                count = count+1
+                label = str((i % num_classes))
+                Y.append('.'+name +','+label+','+text.lower()+','+text+',('+str(offset_i)+' '+str(offset_j)+'),'+font_name)
 
 #Write CSV file
-with open('Train.csv', 'w') as F:
-    F.write('image,label,character,offset,font\n')
+with open(Train_file, 'w') as F:
+    F.write('image,label,identifier,character,offset,font\n')
     F.write('\n'.join(Y))

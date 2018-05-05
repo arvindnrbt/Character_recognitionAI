@@ -8,19 +8,28 @@ from keras.models import Sequential
 from keras.utils import *
 from keras.layers import Dense, Conv2D, Flatten, Dropout
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
-
 import os
+from configuration import config
 
-IMG_PATH = './Images/'
+# Constants
+IMG_PATH = './'+config['IMAGE_PATH']+'/'
 weight_path = './best_weights.hdf5'
-FONT_PATH = './Font Pack/'
-train_csv = 'Train.csv'
-num_classes = 52
-img_rows=50
-img_cols=50
+FONT_PATH = './'+config['FONT_PATH']+'/'
+Train_file = config['TRAIN_CSV']
 
+num_classes = config['NUM_CLASSES']
+img_rows = config['IMAGE_ROWS']
+img_cols = config['IMAGE_COLUMNS']
+num_kernels = config['NUM_FILTERS']
+
+CONFUSION_MATRIX_CSV = './Run/current_model_result.csv'
+RESULT_CSV = './Run/Result.csv'
+METRICS_CSV = './Run/Metrics.csv'
+
+# Preparing list of Upper and Lower case alphabets
 label_vals = list(string.ascii_letters)
 
+# Preprocess function
 def pre_process_image_input(image_files, labels):
     onehot_y = to_categorical(labels, num_classes)
     imgs = [imread(img_path) for img_path in image_files]
@@ -28,26 +37,29 @@ def pre_process_image_input(image_files, labels):
     x = img_array /255
     return x, onehot_y
 
-# CNN Architecture
+# ----------- CNN ARCHITECTURE -------------
 
 character_model = Sequential()
 character_model.add(Conv2D(
-    30, kernel_size=(3,3), activation='relu',
+    num_kernels, kernel_size=(3,3), activation='relu',
     input_shape=(img_rows, img_cols, 3)
 ))
 character_model.add(Conv2D(
-    30, kernel_size=(3,3), activation='relu'))
+    num_kernels, kernel_size=(3,3), activation='relu'))
+character_model.add(Conv2D(
+    num_kernels, kernel_size=(3,3),activation='relu'))
 
 character_model.add(Conv2D(
-    30, kernel_size=(3,3),activation='relu'))
-# character_model.add(Dropout(0.4))
-character_model.add(Conv2D(
-    30, kernel_size=(3,3),activation='relu'))
+    num_kernels, kernel_size=(3,3),activation='relu'))
 character_model.add(Dropout(0.4))
 
 character_model.add(Conv2D(
-    30, kernel_size=(3,3), activation='relu'))
+    num_kernels, kernel_size=(3,3), activation='relu'))
+character_model.add(Conv2D(
+    num_kernels, kernel_size=(3,3), activation='relu'))
+
 character_model.add(Dropout(0.4))
+
 
 character_model.add(Flatten())
 
@@ -55,37 +67,46 @@ character_model.add(Dense(512, activation='relu'))
 character_model.add(Dense(num_classes, activation='softmax'))
 
 character_model.compile(loss=keras.losses.categorical_crossentropy,
-            optimizer='adam',
-            metrics=['accuracy'])
+              optimizer='adam',
+              metrics=['accuracy'])
 
+# ----------- CNN ARCHITECTURE -------------
+
+# Load weights
 character_model.load_weights(weight_path)
 
-# Prediction
-df = pd.read_csv(train_csv)
+# Read CSV
+df = pd.read_csv(Train_file)
 
-for index, img in enumerate(df['image'].tolist()):
-    if not os.path.exists(img):
-        df.drop(index,inplace=True)
+# Eliminate non-existant files
+# for index, img in enumerate(df['image'].tolist()):
+#     if not os.path.exists(img):
+#         df.drop(index,inplace=True)
 
 
 labels = df['label'].tolist()
 image_files = df['image'].tolist()
 
+# Preprocess to get x array and y label
 x,y = pre_process_image_input(image_files,labels)
 
 predictions = character_model.predict_classes(x)
 
 df['prediction']=[label_vals[pred] for pred in predictions]
 
-df.to_csv('Result.csv')
+df.to_csv(RESULT_CSV)
 
-confusionMatrix = pd.crosstab(df['character'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True)
+# Prepare ConfusionMatrix
+confusionMatrix = pd.crosstab(df['identifier'], df['prediction'], rownames=['Actual'], colnames=['Predicted'], margins=True)
 
-confusionMatrix.to_csv('current_model_result.csv')
+# Write ConfusionMatrix to CSV
+confusionMatrix.to_csv(CONFUSION_MATRIX_CSV)
 
+# Drop All label for calculating TPR, FPR, etc.
 confusionMatrix = confusionMatrix.drop(labels='All', axis=1)
 confusionMatrix = confusionMatrix.drop(labels='All', axis=0)
 
+# Calculate Metrics
 FP = confusionMatrix.sum(axis=0) - np.diag(confusionMatrix)  
 FN = confusionMatrix.sum(axis=1) - np.diag(confusionMatrix)
 TP = np.diag(confusionMatrix)
@@ -109,9 +130,22 @@ FDR = FP/(TP+FP)
 # Overall accuracy
 ACC = (TP+TN)/(TP+FP+FN+TN)
 
-print ('True Positive',TPR)
-print ('False Negative',FNR)
-print ('False Positive',FPR)
-print ('True Negative',TNR)
+# print ('True Positive',TPR)
+# print ('False Negative',FNR)
+# print ('False Positive',FPR)
+# print ('True Negative',TNR)
 
-print ('Accuracy', ACC)
+# print ('Accuracy', ACC)
+
+dataF = {
+    'True Positive' : TPR,
+    'False Positive': FPR,
+    'True Negative': TNR,
+    'False Negative': FNR,
+    'Accuracy': ACC
+}
+
+Metrics = pd.DataFrame(data=dataF)
+print (Metrics)
+
+Metrics.to_csv(METRICS_CSV)

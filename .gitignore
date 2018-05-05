@@ -1,6 +1,6 @@
-*.csv
 */.DS_Store
 .DS_Store
 Images
 .vscode
 env*
+__pycache__
