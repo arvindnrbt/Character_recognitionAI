@@ -6,7 +6,7 @@ import string
 import keras
 from keras.models import Sequential
 from keras.utils import *
-from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 from keras.preprocessing.image import ImageDataGenerator, img_to_array
 import os
 from configuration import config
@@ -27,15 +27,14 @@ RESULT_CSV = './Run/Result.csv'
 METRICS_CSV = './Run/Metrics.csv'
 
 # Preparing list of Upper and Lower case alphabets
-label_vals = list(string.ascii_letters)
+label_vals = list(string.ascii_letters)[0:26] + list(string.digits)
 
 # Preprocess function
 def pre_process_image_input(image_files, labels):
-    onehot_y = to_categorical(labels, num_classes)
     imgs = [imread(img_path) for img_path in image_files]
     img_array = np.array([(img_to_array(img)) for img in imgs])
     x = img_array /255
-    return x, onehot_y
+    return x
 
 # ----------- CNN ARCHITECTURE -------------
 
@@ -51,24 +50,27 @@ character_model.add(Conv2D(
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3),activation='relu'))
-character_model.add(Dropout(0.4))
+# Max pooling
+character_model.add(MaxPooling2D(pool_size=(3,3)))
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
-
-character_model.add(Dropout(0.4))
-
 
 character_model.add(Flatten())
 
 character_model.add(Dense(512, activation='relu'))
+
+# Dropout
+character_model.add(Dropout(0.2))
+
 character_model.add(Dense(num_classes, activation='softmax'))
 
 character_model.compile(loss=keras.losses.categorical_crossentropy,
               optimizer='adam',
               metrics=['accuracy'])
+
 
 # ----------- CNN ARCHITECTURE -------------
 
@@ -88,7 +90,7 @@ labels = df['label'].tolist()
 image_files = df['image'].tolist()
 
 # Preprocess to get x array and y label
-x,y = pre_process_image_input(image_files,labels)
+x = pre_process_image_input(image_files,labels)
 
 predictions = character_model.predict_classes(x)
 

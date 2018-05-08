@@ -1,5 +1,5 @@
 config = {
-    'NUM_CLASSES':26,
+    'NUM_CLASSES':36,
     'IMAGE_ROWS':50,
     'IMAGE_COLUMNS':50,
     'NUM_FILTERS':30,

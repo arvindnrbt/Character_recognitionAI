@@ -7,12 +7,11 @@ IMAGE_FOLDER = '/'+config['IMAGE_PATH']+'/'
 FONT_FOLDER = os.getcwd()+'/'+config['FONT_PATH']+'/'
 fonts = os.listdir(FONT_FOLDER)
 
-num_classes=config['NUM_CLASSES']
 img_row = config['IMAGE_ROWS']
 img_col = config['IMAGE_COLUMNS']
 Train_file = config['TRAIN_CSV']
 
-characters = list(string.ascii_letters) #+list(string.digits)
+characters = list(string.ascii_letters)+list(string.digits)
 print ('Characters: ',characters)
 print ('Number of fonts used: ',len(fonts)-3)
 
@@ -47,10 +46,17 @@ for i,text in enumerate(characters):
         font_name = font_loc.split('.')[0].split('/')[-1]
         for offset_i in range(xoff[0],xoff[1],step):
             for offset_j in range(yoff[0],yoff[1],step):
-                name = IMAGE_FOLDER+str(text)+str(count)+'.png'                    
+                if i>(len(string.ascii_letters)-1):
+                    # From string.digits 0 - 9
+                    label = str(i-26)
+                    if font_name in ["Backpack_PersonalUse", "slender", "krazynights", "AdineKirnberg-Script"]:
+                        continue
+                else:
+                    k = len(string.ascii_letters)//2
+                    label = str(i % k)
+                name = IMAGE_FOLDER+str(text)+'_'+str(count)+'.png'                    
                 MakeImg(text, font, name, size, (offset_i,offset_j))
                 count = count+1
-                label = str((i % num_classes))
                 Y.append('.'+name +','+label+','+text.lower()+','+text+',('+str(offset_i)+' '+str(offset_j)+'),'+font_name)
 
 #Write CSV file

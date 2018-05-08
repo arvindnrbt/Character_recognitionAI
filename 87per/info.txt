@@ -1,0 +1,5 @@
+score [0.43830381098284804, 0.877450298885137]
+
+Epoch - 8
+
+Trained All Alphanumeric characters by considering uppercase and lowercase letters to be the same. [A-za-z0-9]

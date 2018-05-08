@@ -6,7 +6,7 @@ from keras.preprocessing.image import ImageDataGenerator, img_to_array
 from skimage.io import imread
 from sklearn.model_selection import train_test_split
 from keras.models import Sequential
-from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 from keras.utils import *
 import tensorflow as tf
 import os
@@ -93,19 +93,21 @@ character_model.add(Conv2D(
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3),activation='relu'))
-character_model.add(Dropout(0.2))
+# Max pooling
+character_model.add(MaxPooling2D(pool_size=(3,3)))
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
-
-character_model.add(Dropout(0.2))
-
 
 character_model.add(Flatten())
 
 character_model.add(Dense(512, activation='relu'))
+
+# Dropout
+character_model.add(Dropout(0.2))
+
 character_model.add(Dense(num_classes, activation='softmax'))
 
 character_model.compile(loss=keras.losses.categorical_crossentropy,
@@ -120,11 +122,11 @@ character_model.summary()
 
 # Fit model
 character_model.fit_generator(train_generator,
-          epochs=14,
+          epochs=8,
         #   steps_per_epoch = 20,
           validation_data = val_generator,
           callbacks=[earlyStopping, modelCheckpoint])
 
 # Evaluation on test data which is 10% split (Unseen) from training data
-score = character_model.evaluate(test_input, test_label, batch_size=128)
+score = character_model.evaluate(test_input, test_label, batch_size=512)
 print ('score',score)

@@ -6,7 +6,7 @@ import os, string
 import keras
 from keras.models import Sequential
 from keras.utils import *
-from keras.layers import Dense, Conv2D, Flatten, Dropout
+from keras.layers import Dense, Conv2D, Flatten, Dropout, MaxPooling2D
 from skimage.transform import resize
 from keras.preprocessing.image import img_to_array
 import argparse
@@ -26,7 +26,7 @@ args = parser.parse_args()
 image_file = args.image
 
 # Ascii letters
-label_vals = list(string.ascii_letters)
+label_vals = list(string.ascii_letters)+list(string.digits)
 
 # Pre-Process image
 def pre_process_image_input(image_file):
@@ -49,19 +49,21 @@ character_model.add(Conv2D(
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3),activation='relu'))
-character_model.add(Dropout(0.4))
+# Max pooling
+character_model.add(MaxPooling2D(pool_size=(3,3)))
 
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
 character_model.add(Conv2D(
     num_kernels, kernel_size=(3,3), activation='relu'))
-
-character_model.add(Dropout(0.4))
-
 
 character_model.add(Flatten())
 
 character_model.add(Dense(512, activation='relu'))
+
+# Dropout
+character_model.add(Dropout(0.2))
+
 character_model.add(Dense(num_classes, activation='softmax'))
 
 character_model.compile(loss=keras.losses.categorical_crossentropy,
@@ -74,4 +76,4 @@ character_model.load_weights(weight_path)
 
 x = pre_process_image_input(image_file)
 predictions = character_model.predict_classes(x)
-print (label_dict[predictions[0]])
+print (label_vals[predictions[0]])
